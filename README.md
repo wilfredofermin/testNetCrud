@@ -19,6 +19,8 @@ API → Infrastructure → Application → Domain
 
 ## Funcionalidades
 
+
+
 | Endpoint | Descripción |
 |----------|-------------|
 | `GET /api/products` | Lista todos los productos |
@@ -55,6 +57,7 @@ dotnet test
 El proyecto incluye dos herramientas de documentación API basadas en OpenAPI 3.0:
 
 ### Swagger UI (`/swagger`)
+![alt text](image-1.png)
 
 Interfaz clásica que permite explorar endpoints y ejecutar peticiones directamente desde el navegador. Cada DTO incluye **data annotations** (`[Required]`, `[Range]`, `[StringLength]`, `[DefaultValue]`) que Swagger renderiza como constraints en los schemas:
 
@@ -64,6 +67,7 @@ Interfaz clásica que permite explorar endpoints y ejecutar peticiones directame
 - Valores por defecto visibles
 
 ### Redoc (`/redoc`)
+![alt text](image.png)
 
 Interfaz alternativa con diseño limpio y columnas, ideal para compartir como documentación estática. Generada desde el mismo `swagger.json`, muestra todos los endpoints, schemas y ejemplos en un formato de lectura más amigable.
 
