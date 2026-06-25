@@ -1,5 +1,36 @@
 # Endpoint Documentation
 
+## Documentación interactiva
+
+Además de este documento estático, la API expone dos herramientas de documentación dinámica:
+
+| Herramienta | URL | Descripción |
+|---|---|---|
+| **Swagger UI** | `http://localhost:5106/swagger` | Interfaz interactiva para explorar y probar endpoints |
+| **Redoc** | `http://localhost:5106/redoc` | Documentación visual de lectura limpia en columnas |
+
+Ambas se generan desde el mismo archivo `swagger.json` (OpenAPI 3.0) y reflejan los schemas con **data annotations** (`[Required]`, `[Range]`, `[StringLength]`, `[DefaultValue]`) que muestran constraints y ejemplos en cada campo.
+
+## Postman
+
+Importar `docs/collection.json` en Postman. La colección incluye:
+
+- Variable `baseUrl` → `http://localhost:5106`
+- Variable `productId` → se actualiza automáticamente al crear un producto
+- Todos los endpoints CRUD + stock preconfigurados
+
+```json
+// Ejemplo: Body de POST /api/products en Postman
+{
+  "code": "LAP-010",
+  "name": "Nuevo Producto",
+  "description": "Descripción del producto",
+  "price": 599.99,
+  "stockQuantity": 25,
+  "currency": "USD"
+}
+```
+
 ## Product CRUD - Casos de Uso
 
 ---
@@ -166,6 +197,24 @@ PATCH /api/products/{id}/stock/add
 **Response**: `200 OK` (ProductDto actualizado) | `404 Not Found`
 
 ---
+
+---
+
+### UC-11: Resetear y Sembrar Base de Datos
+
+```
+POST /api/seed
+```
+
+**Caso de Uso**: Eliminar todos los productos y recargar los 10 productos de prueba. Útil para desarrollo y testing.  
+**Response**: `200 OK`
+
+```json
+{
+  "message": "Database reset and seeded with 10 products.",
+  "count": 10
+}
+```
 
 ### UC-10: Remover Stock
 

@@ -12,8 +12,8 @@ Sistema CRUD de productos construido con **.NET 8** siguiendo principios de **Do
 | Lenguaje          | C# 12                               |
 | ORM               | Entity Framework Core 8             |
 | Base de datos     | InMemory (intercambiable por SQL Server/PostgreSQL) |
-| Documentación API | Swagger / OpenAPI 3.0               |
-| Testing           | xUnit + Moq + FluentAssertions      |
+| Documentación API | Swagger UI + Redoc (OpenAPI 3.0)     |
+| Testing           | xUnit + Moq + FluentAssertions + WebApplicationFactory |
 
 ## 3. Arquitectura
 
@@ -61,6 +61,7 @@ Sistema CRUD de productos construido con **.NET 8** siguiendo principios de **Do
 - **Dependency Injection**: Inversión de control nativa de .NET
 - **Result Pattern**: Manejo consistente de errores
 - **Middleware Pipeline**: Exception middleware global
+- **Data Annotations**: `[Required]`, `[Range]`, `[StringLength]`, `[DefaultValue]` en DTOs para enriquecer schemas Swagger/Redoc
 
 ## 5. Modelo de Dominio
 
@@ -99,6 +100,7 @@ UpdatedAt     : DateTime?
 | DELETE | /api/products/{id}       | Eliminar producto          |
 | PATCH  | /api/products/{id}/stock/add     | Agregar stock    |
 | PATCH  | /api/products/{id}/stock/remove  | Remover stock    |
+| POST   | /api/seed                        | Resetear y sembrar DB con 10 productos de prueba |
 
 ## 7. Escalabilidad y Mantenibilidad
 
@@ -121,14 +123,18 @@ UpdatedAt     : DateTime?
 ```
 tests/testNet.Tests/
 ├── Domain/
-│   ├── ProductTests.cs           # 13 tests
-│   ├── ProductCodeTests.cs       # 5 tests
-│   ├── PriceTests.cs             # 6 tests
-│   └── ProductDomainServiceTests.cs # 3 tests
+│   ├── ProductTests.cs                 # 13 tests
+│   ├── ProductCodeTests.cs             # 5 tests
+│   ├── PriceTests.cs                   # 6 tests
+│   └── ProductDomainServiceTests.cs    # 3 tests
 ├── Application/
-│   ├── ProductServiceTests.cs    # 15 tests
-│   ├── ValidatorsTests.cs        # 3 tests
-│   └── ProductMappingTests.cs    # 1 test
+│   ├── ProductServiceTests.cs          # 15 tests
+│   ├── ValidatorsTests.cs              # 3 tests
+│   ├── ProductMappingTests.cs          # 1 test
+│   └── DtoValidationAnnotationsTests.cs # 22 tests (CreateProduct, UpdateProduct, PagedRequest, StockRequest)
 └── API/
-    └── ProductsControllerTests.cs # 10 tests
+    ├── ProductsControllerTests.cs      # 10 tests
+    └── IntegrationTests.cs              # 4 tests (Redoc, Swagger y Seed endpoint)
 ```
+
+**Total: 90 tests** — Validación de dominio, servicios de aplicación, mapeo DTO, controladores, anotaciones de datos, documentación interactiva y seed endpoint.

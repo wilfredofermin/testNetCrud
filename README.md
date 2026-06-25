@@ -31,6 +31,7 @@ API → Infrastructure → Application → Domain
 | `DELETE /api/products/{id}` | Elimina un producto |
 | `PATCH /api/products/{id}/stock/add` | Agrega stock |
 | `PATCH /api/products/{id}/stock/remove` | Remueve stock |
+| `POST /api/seed` | Resetea y siembra DB con 10 productos de prueba |
 
 ## Cómo usar
 
@@ -39,27 +40,69 @@ API → Infrastructure → Application → Domain
 dotnet restore
 
 # Ejecutar en desarrollo
-dotnet run --project src/testNet.API
+dotnet run --project src/testNet.API --urls "http://localhost:5106"
 
 # Ejecutar tests
 dotnet test
 
-# Documentación Swagger
-# Abrir http://localhost:5000/swagger
+# Documentación interactiva
+# Swagger UI: http://localhost:5106/swagger
+# Redoc:      http://localhost:5106/redoc
 ```
+
+## Documentación interactiva
+
+El proyecto incluye dos herramientas de documentación API basadas en OpenAPI 3.0:
+
+### Swagger UI (`/swagger`)
+
+Interfaz clásica que permite explorar endpoints y ejecutar peticiones directamente desde el navegador. Cada DTO incluye **data annotations** (`[Required]`, `[Range]`, `[StringLength]`, `[DefaultValue]`) que Swagger renderiza como constraints en los schemas:
+
+- Campos requeridos marcados con asterisco rojo
+- Límites de longitud en strings (min/max)
+- Rangos numéricos (min/max)
+- Valores por defecto visibles
+
+### Redoc (`/redoc`)
+
+Interfaz alternativa con diseño limpio y columnas, ideal para compartir como documentación estática. Generada desde el mismo `swagger.json`, muestra todos los endpoints, schemas y ejemplos en un formato de lectura más amigable.
 
 ## Lógica aplicada
 
 - **Value Objects inmutables** (Price, ProductCode): se validan a sí mismos al construirse, garantizando que nunca exista un estado inválido.
 - **Domain Services**: encapsulan reglas de negocio que involucran múltiples entidades (ej: transferencia de stock entre productos).
 - **Exception Middleware**: captura excepciones de dominio y las transforma en respuestas HTTP consistentes sin ensuciar los controladores.
-- **Validación en Application**: los DTOs de entrada se validan antes de llegar al dominio, manteniendo las reglas de negocio puras.
+- **Validación en Application**: los DTOs se validan en dos niveles: (1) data annotations para constraints básicos en la capa API, (2) validadores manuales para reglas de negocio antes de llegar al dominio.
 - **Paginación**: todas las consultas list utilizan paginación para evitar saturación de memoria y red.
 - **Mapeo explícito DTO ↔ Entidad**: evita exponer el modelo interno y permite evolucionar API y dominio independientemente.
 
+## Postman
+
+La colección de Postman se encuentra en `docs/collection.json`. Para usarla:
+
+1. Abre Postman → **Import** → selecciona `docs/collection.json`
+2. La colección incluye una variable `baseUrl` configurada como `http://localhost:5106`
+3. Ejecuta **Create Product** primero (guarda automáticamente el `productId` como variable de colección)
+4. Los demás endpoints usan `{{baseUrl}}` y `{{productId}}` automáticamente
+
+```json
+// Ejemplo: crear producto desde Postman
+POST {{baseUrl}}/api/products
+Content-Type: application/json
+
+{
+  "code": "LAP-010",
+  "name": "Nuevo Producto",
+  "description": "Descripción del producto",
+  "price": 599.99,
+  "stockQuantity": 25,
+  "currency": "USD"
+}
+```
+
 ## Mantenibilidad
 
-- **Pruebas unitarias**: cada función del dominio, aplicación y API tiene su test correspondiente.
+- **Pruebas unitarias**: 88 tests (dominio, aplicación, API + validación de anotaciones e integración).
 - **Separación de capas**: modificar persistencia no afecta reglas de negocio y viceversa.
 - **Inyección de dependencias**: todas las dependencias se resuelven por constructor, facilitando mocking.
 - **Código sin comentarios**: los nombres de clases, métodos y variables son autoexplicativos.
@@ -75,16 +118,17 @@ dotnet test
 
 ```
 ├── src/
-│   ├── testNet.API/            # Controladores y middleware
-│   ├── testNet.Application/    # Casos de uso y DTOs
+│   ├── testNet.API/            # Controladores, middleware y endpoints
+│   ├── testNet.Application/    # Casos de uso, DTOs, validadores
 │   ├── testNet.Domain/         # Entidades y reglas de negocio
 │   └── testNet.Infrastructure/ # EF Core y repositorios
 ├── tests/
-│   └── testNet.Tests/          # Tests unitarios (xUnit + Moq)
+│   └── testNet.Tests/          # Tests (xUnit + Moq + FluentAssertions)
 ├── docs/
 │   ├── ADR.md                  # Decisiones arquitectónicas
 │   ├── SPEC.md                 # Especificación técnica
 │   ├── endpoints.md            # Documentación de endpoints
+│   ├── ARCHITECTURE.md         # Explicación detallada de patrones
 │   └── collection.json         # Colección Postman
 ├── AGENT.md                    # Contexto para asistentes IA
 └── README.md

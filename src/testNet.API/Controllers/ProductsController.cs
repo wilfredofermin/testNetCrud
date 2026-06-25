@@ -159,11 +159,3 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 }
-
-/// <summary>Solicitud para operaciones de ajuste de stock.</summary>
-public class StockRequest
-{
-    /// <summary>Cantidad de unidades a agregar o remover. Debe ser un valor positivo.</summary>
-    /// <example>10</example>
-    public int Quantity { get; set; }
-}
