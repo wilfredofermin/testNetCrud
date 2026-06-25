@@ -1,6 +1,6 @@
 # testNet
 
-API RESTful para gestión de productos construida con **.NET 8** y **Domain-Driven Design**.
+API RESTful de gestión de productos sobre **.NET 8** con arquitectura **Domain-Driven Design** en 4 capas estrictas. Implementa CRUD completo con 11 endpoints, control de inventario, paginación con metadatos y Value Objects inmutables. Documentación interactiva via Swagger UI y Redoc. Persistencia con EF Core InMemory (intercambiable por SQL Server/PostgreSQL). **90 tests** (xUnit + Moq + FluentAssertions + WebApplicationFactory). Sin dependencias externas más allá de EF Core y Swashbuckle — cero AutoMapper, cero FluentValidation.
 
 ## Arquitectura
 
@@ -130,6 +130,18 @@ Content-Type: application/json
 │   ├── endpoints.md            # Documentación de endpoints
 │   ├── ARCHITECTURE.md         # Explicación detallada de patrones
 │   └── collection.json         # Colección Postman
-├── AGENT.md                    # Contexto para asistentes IA
+├── AGENTS.md                   # Contexto para asistentes IA
 └── README.md
+
+## Asistencia por IA (Agentes)
+
+El archivo `AGENTS.md` en la raíz del proyecto funciona como **contexto de entrada para asistentes de IA** (como opencode, Claude, ChatGPT, etc.). Contiene:
+
+- **Arquitectura del proyecto**: ubicación de cada capa y sus dependencias
+- **Comandos exactos**: `dotnet build`, `dotnet test`, `dotnet run` con los flags correctos
+- **Puntos clave**: reglas sobre Value Objects, mapeo DTO, Exception Middleware, restricciones de EF Core InMemory
+- **Patrones de tests**: convención de nombres, nivel de mocking por capa, helpers reutilizables
+- **Swagger**: estándar de documentación XML en endpoints y DTOs
+
+Al cargar `AGENTS.md` como instrucción inicial, el asistente IA conoce la estructura, comandos y convenciones del proyecto sin necesidad de explicación manual, lo que acelera tareas de mantenimiento, generación de código y debugging.
 ```

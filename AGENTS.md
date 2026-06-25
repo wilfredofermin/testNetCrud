@@ -1,46 +1,74 @@
 # AGENTS.md — testNet
 
-.NET 8 REST API con Domain-Driven Design (4 capas).
+## INSTRUCCIÓN PARA EL AGENTE
 
-## Arquitectura
+Al inicializar, DEBES leer los siguientes archivos para comprender el proyecto:
+
+1. **`docs/SPEC.md`** — Especificación técnica completa: stack, arquitectura, modelo de dominio, reglas de negocio, principios SOLID, escalabilidad, y distribución de tests. Es la fuente principal de contexto.
+2. **`docs/endpoints.md`** — Documentación de cada endpoint con ejemplos JSON de request/response.
+3. **`docs/ADR.md`** — Decisiones arquitectónicas y su justificación.
+
+La información contenida en este `AGENTS.md` es un resumen ejecutivo para arranque rápido. Ante cualquier duda de diseño o comportamiento, pri riza la información de `docs/SPEC.md`.
+
+---
+
+## RESUMEN EJECUTIVO
+
+API RESTful de gestión de productos sobre .NET 8 con Domain-Driven Design en 4 capas estrictas.
 
 ```
-src/testNet.Domain/        # Entidades, ValueObjects, DomainServices, interfaces de repositorio
-src/testNet.Application/   # Services, DTOs, Validators, Common (PagedResult)
-src/testNet.Infrastructure/ # EF Core (InMemory), Repositorios, DbSeeder, DependencyInjection
-src/testNet.API/           # Controllers, ExceptionMiddleware, Swagger
-tests/testNet.Tests/       # xUnit + Moq + FluentAssertions
+API → Infrastructure → Application → Domain
 ```
 
-Dependencias entre capas (estrictas): `API → Infrastructure → Application → Domain`. Domain no depende de nada.
+**Stack**: .NET 8 | C# 12 | EF Core 8 (InMemory) | Swashbuckle 6 | Redoc
+**Tests**: 90 — xUnit + Moq + FluentAssertions + WebApplicationFactory
 
-## Comandos exactos
+**Regla fundamental**: NO agregar dependencias externas innecesarias (cero AutoMapper, cero FluentValidation, cero MediatR).
+
+**Validación doble capa**: (1) Data annotations `[Required][Range][StringLength]` en DTOs para validación automática ASP.NET, (2) validadores manuales `CreateProductValidator.Validate()` para reglas de negocio.
+
+---
+
+## COMANDOS
 
 ```bash
 dotnet build                  # 0 warnings requerido
-dotnet test                   # 64 tests, ~120ms
-dotnet run --project src/testNet.API --urls "http://localhost:5106"  # API + Swagger + seeder
+dotnet test                   # 90 tests
+dotnet run --project src/testNet.API --urls "http://localhost:5106"  # http://localhost:5106/swagger
 ```
 
-## Puntos clave
+---
 
-- **Value Objects inmutables** (`Price`, `ProductCode`) — se validan en el constructor, `sealed record`.
-- **Mapeo DTO manual** por extension methods (`ProductMappingExtensions.ToDto()`), sin AutoMapper.
-- **Exception Middleware** captura `DomainException` → 400, `KeyNotFoundException` → 404, resto → 500.
-- **DbContext** ignora `Price`/`ProductCode` globalmente; los VO se construyen desde primitivas (`CodeValue`, `PriceAmount`, `CurrencyCode`).
-- **EF Core InMemory** — no soporta `HasColumnName`, `HasDefaultValue`, `HasPrecision`; solo usar configuraciones InMemory-compatibles.
-- **Seeder** ejecuta en startup (`Program.cs` línea 53). Si `Products.Any()` salta.
+## ENDPOINTS
 
-## Tests — patrones
+| Método | Ruta | Response |
+|--------|------|----------|
+| GET | `/api/products` | `200` → lista |
+| GET | `/api/products/active` | `200` → activos |
+| GET | `/api/products/paged?page=&pageSize=` | `200` → paginado |
+| GET | `/api/products/{id:guid}` | `200` / `404` |
+| GET | `/api/products/code/{code}` | `200` / `404` |
+| POST | `/api/products` | `201` / `400` |
+| PUT | `/api/products/{id:guid}` | `200` / `400` / `404` |
+| DELETE | `/api/products/{id:guid}` | `204` / `404` |
+| PATCH | `/api/products/{id:guid}/stock/add` | `200` / `400` / `404` |
+| PATCH | `/api/products/{id:guid}/stock/remove` | `200` / `400` / `404` |
+| POST | `/api/seed` | `200` → resetea datos |
 
-- Nombres: `{Metodo}_{Escenario}_Should{Comportamiento}`
-- Domain: no mocks, assert sobre entidades directamente
-- Application: `Mock<IProductRepository>` + `ProductDomainService` real (no mockeado) + `ProductService`
-- API: `Mock<IProductService>`, assert sobre `IActionResult`
-- Fixtures: helpers privados `CreateSampleProduct()`, `CreateSampleCreateDto()`
+---
 
-## Swagger
+## FLUJO TÍPICO
 
-- Endpoints con XML `<summary>`, `<remarks>`, `<param>`, `<response>`
-- DTOs con `<example>` en cada propiedad
-- `NoWarn 1591,1573` para no documentar CancellationToken o parámetros triviales
+```
+POST /api/products
+  → ExceptionMiddleware
+    → ProductsController.Create()
+      → IProductService.CreateAsync()
+        → CreateProductValidator.Validate()
+        → ProductDomainService.CreateProductAsync() [unicidad]
+          → IProductRepository.ExistsByCodeAsync()
+          → new Product()
+        → IProductRepository.AddAsync()
+      → Product.ToDto()
+    → CreatedAtAction()
+```
