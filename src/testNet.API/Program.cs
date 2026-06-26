@@ -56,6 +56,10 @@ using (var scope = app.Services.CreateScope())
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors();
 
+// SPA CRUD: sirve wwwroot/ y hace de index.html la vista por defecto en "/"
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {

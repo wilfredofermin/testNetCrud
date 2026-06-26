@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>testNet — Gestión de Productos</title>
+    <meta name="description" content="Panel CRUD para la gestión de productos de testNet." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50:  '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/app.css" />
+</head>
+<body class="h-full bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 grid place-items-center text-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-bold text-slate-900 leading-tight">testNet</h1>
+                        <p class="text-xs text-slate-500 leading-tight">Gestión de Productos</p>
+                    </div>
+                </div>
+                <nav class="flex items-center gap-1 sm:gap-2">
+                    <a href="swagger" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Swagger
+                    </a>
+                    <a href="redoc" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Redoc
+                    </a>
+                    <button id="btnSeed" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+                        <span class="hidden sm:inline">Reset DB</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+
+        <!-- Stats -->
+        <section id="stats" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total</p>
+                    <span class="text-brand-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
+                </div>
+                <p id="statTotal" class="mt-2 text-2xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Activos</p>
+                    <span class="text-emerald-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                </div>
+                <p id="statActive" class="mt-2 text-2xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Inventario</p>
+                    <span class="text-amber-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+                </div>
+                <p id="statStock" class="mt-2 text-2xl font-bold text-slate-900">—</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Valor catálogo</p>
+                    <span class="text-brand-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                </div>
+                <p id="statValue" class="mt-2 text-2xl font-bold text-slate-900">—</p>
+            </div>
+        </section>
+
+        <!-- Toolbar -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm mb-4">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3 p-4">
+                <!-- View tabs -->
+                <div class="inline-flex bg-slate-100 rounded-xl p-1 self-start" role="tablist" aria-label="Vista">
+                    <button data-view="all" class="view-tab px-3 py-1.5 text-sm font-medium rounded-lg transition" role="tab">Todos</button>
+                    <button data-view="active" class="view-tab px-3 py-1.5 text-sm font-medium rounded-lg transition" role="tab">Activos</button>
+                    <button data-view="paged" class="view-tab px-3 py-1.5 text-sm font-medium rounded-lg transition" role="tab">Paginado</button>
+                </div>
+
+                <!-- Search -->
+                <div class="relative flex-1 min-w-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input id="searchInput" type="search" placeholder="Buscar por código o nombre…" class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition" />
+                </div>
+
+                <!-- Page size (paged view only) -->
+                <div id="pageSizeWrap" class="hidden items-center gap-2">
+                    <label for="pageSizeSelect" class="text-sm text-slate-500">Por página:</label>
+                    <select id="pageSizeSelect" class="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none">
+                        <option>5</option><option selected>10</option><option>20</option><option>50</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btnRefresh" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span class="hidden sm:inline">Refrescar</span>
+                    </button>
+                    <button id="btnNew" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nuevo
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Table -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            <th class="px-4 py-3">Código</th>
+                            <th class="px-4 py-3">Nombre</th>
+                            <th class="px-4 py-3 text-right">Precio</th>
+                            <th class="px-4 py-3 text-center">Stock</th>
+                            <th class="px-4 py-3 text-center">Estado</th>
+                            <th class="px-4 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productRows" class="divide-y divide-slate-100 text-sm"></tbody>
+                </table>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingState" class="hidden p-10 text-center text-slate-400">
+                <svg class="animate-spin w-6 h-6 mx-auto mb-2 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Cargando productos…
+            </div>
+
+            <!-- Empty -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 grid place-items-center text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+                <p class="text-slate-600 font-medium">No hay productos para mostrar</p>
+                <p id="emptyHint" class="text-slate-400 text-sm mt-1">Crea uno nuevo o reinicia la base de datos.</p>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="hidden items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 bg-slate-50 text-sm">
+                <p id="pageInfo" class="text-slate-500"></p>
+                <div class="flex items-center gap-1">
+                    <button id="btnFirst" class="page-btn" title="Primera">«</button>
+                    <button id="btnPrev" class="page-btn" title="Anterior">‹</button>
+                    <span id="pageIndicator" class="px-3 py-1 font-semibold text-slate-700"></span>
+                    <button id="btnNext" class="page-btn" title="Siguiente">›</button>
+                    <button id="btnLast" class="page-btn" title="Última">»</button>
+                </div>
+            </div>
+        </section>
+
+        <p class="text-center text-xs text-slate-400 mt-6">
+            testNet · .NET 8 · DDD · <a href="swagger" class="hover:text-brand-600 underline">API</a>
+        </p>
+    </main>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80 max-w-[calc(100vw-2rem)]"></div>
+
+    <!-- Modal: Create / Edit -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-panel">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <h2 id="productModalTitle" class="text-lg font-bold text-slate-900">Nuevo producto</h2>
+                <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+            </div>
+            <form id="productForm" class="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="hidden" id="fId" />
+                <div class="sm:col-span-1">
+                    <label for="fCode" class="form-label">Código <span class="text-rose-500">*</span></label>
+                    <input id="fCode" name="code" class="form-input" maxlength="50" placeholder="LAP-001" />
+                    <p class="form-hint">Único, máx. 50 caracteres.</p>
+                </div>
+                <div class="sm:col-span-1">
+                    <label for="fCurrency" class="form-label">Moneda <span class="text-rose-500">*</span></label>
+                    <select id="fCurrency" name="currency" class="form-input">
+                        <option>USD</option><option>EUR</option><option>MXN</option><option>COP</option><option>ARS</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="fName" class="form-label">Nombre <span class="text-rose-500">*</span></label>
+                    <input id="fName" name="name" class="form-input" maxlength="200" placeholder="Laptop Gamer RTX 4080" />
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="fDescription" class="form-label">Descripción</label>
+                    <textarea id="fDescription" name="description" rows="2" maxlength="2000" class="form-input resize-y" placeholder="Descripción del producto…"></textarea>
+                </div>
+                <div class="sm:col-span-1">
+                    <label for="fPrice" class="form-label">Precio <span class="text-rose-500">*</span></label>
+                    <input id="fPrice" name="price" type="number" min="0" step="0.01" class="form-input" placeholder="0.00" />
+                </div>
+                <div class="sm:col-span-1">
+                    <label for="fStock" class="form-label">Stock <span class="text-rose-500">*</span></label>
+                    <input id="fStock" name="stockQuantity" type="number" min="0" step="1" class="form-input" placeholder="0" />
+                </div>
+                <div id="activeWrap" class="hidden sm:col-span-2 items-center gap-2">
+                    <input id="fIsActive" name="isActive" type="checkbox" class="w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                    <label for="fIsActive" class="text-sm text-slate-700">Producto activo</label>
+                </div>
+                <div class="sm:col-span-2 flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" class="btn-base btn-ghost" data-close>Cancelar</button>
+                    <button id="productSubmit" type="submit" class="btn-base btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Stock -->
+    <div id="stockModal" class="modal hidden">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-panel sm:max-w-md">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900">Ajustar inventario</h2>
+                <button class="modal-close" data-close aria-label="Cerrar">&times;</button>
+            </div>
+            <div class="px-5 py-4">
+                <p class="text-sm text-slate-600 mb-1">Producto: <span id="stockProductName" class="font-semibold text-slate-900"></span></p>
+                <p class="text-sm text-slate-600 mb-4">Stock actual: <span id="stockCurrent" class="font-mono font-semibold text-slate-900"></span></p>
+                <label for="stockQuantity" class="form-label">Cantidad</label>
+                <input id="stockQuantity" type="number" min="1" step="1" value="1" class="form-input" />
+                <div class="flex items-center justify-end gap-2 mt-5 pt-4 border-t border-slate-100">
+                    <button type="button" class="btn-base btn-ghost" data-close>Cancelar</button>
+                    <button id="btnStockRemove" type="button" class="btn-base btn-amber">Remover</button>
+                    <button id="btnStockAdd" type="button" class="btn-base btn-emerald">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirm delete -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-panel sm:max-w-md">
+            <div class="px-5 py-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 grid place-items-center text-rose-600 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-bold text-slate-900">Eliminar producto</h2>
+                        <p class="text-sm text-slate-600 mt-1">¿Seguro que deseas eliminar <span id="confirmName" class="font-semibold text-slate-900"></span>? Esta acción no se puede deshacer.</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-5 pt-4 border-t border-slate-100">
+                    <button type="button" class="btn-base btn-ghost" data-close>Cancelar</button>
+                    <button id="btnConfirmDelete" type="button" class="btn-base btn-danger">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
