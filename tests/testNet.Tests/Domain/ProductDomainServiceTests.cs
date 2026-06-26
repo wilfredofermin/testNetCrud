@@ -75,4 +75,29 @@ public class ProductDomainServiceTests
         await act.Should().ThrowAsync<DomainException>()
             .WithMessage("*Insufficient stock*");
     }
+
+    [Fact]
+    public async Task TransferStockAsync_WhenSourceNotFound_ShouldThrow()
+    {
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Product?)null);
+
+        Func<Task> act = () => _domainService.TransferStockAsync(Guid.NewGuid(), Guid.NewGuid(), 5);
+
+        await act.Should().ThrowAsync<DomainException>().WithMessage("*Source product*");
+    }
+
+    [Fact]
+    public async Task TransferStockAsync_WhenDestinationNotFound_ShouldThrow()
+    {
+        var fromProduct = new Product("SRC", "Source", "", 10, 100);
+        _repositoryMock.Setup(r => r.GetByIdAsync(fromProduct.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(fromProduct);
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.Is<Guid>(g => g != fromProduct.Id), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Product?)null);
+
+        Func<Task> act = () => _domainService.TransferStockAsync(fromProduct.Id, Guid.NewGuid(), 5);
+
+        await act.Should().ThrowAsync<DomainException>().WithMessage("*Destination product*");
+    }
 }

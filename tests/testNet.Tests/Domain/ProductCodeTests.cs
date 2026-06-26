@@ -45,4 +45,12 @@ public class ProductCodeTests
         ProductCode code = "TEST";
         code.Value.Should().Be("TEST");
     }
+
+    [Fact]
+    public void ToString_ShouldReturnCodeValue()
+    {
+        var code = new ProductCode("PRD-001");
+
+        code.ToString().Should().Be("PRD-001");
+    }
 }

@@ -139,6 +139,37 @@ public class ProductTests
         product.IsActive.Should().BeFalse();
     }
 
+    [Fact]
+    public void SetName_WithTooLongValue_ShouldThrow()
+    {
+        var product = CreateValidProduct();
+        var longName = new string('A', 201);
+
+        Action act = () => product.SetName(longName);
+
+        act.Should().Throw<DomainException>().WithMessage("*200 characters*");
+    }
+
+    [Fact]
+    public void SetDescription_WithNull_ShouldSetEmptyString()
+    {
+        var product = CreateValidProduct();
+
+        product.SetDescription(null!);
+
+        product.Description.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void SetStock_WithNegativeValue_ShouldThrow()
+    {
+        var product = CreateValidProduct();
+
+        Action act = () => product.SetStock(-1);
+
+        act.Should().Throw<DomainException>().WithMessage("*negative*");
+    }
+
     private static Product CreateValidProduct()
     {
         return new Product("P001", "Test Product", "Description", 10.99m, 100);

@@ -120,21 +120,44 @@ UpdatedAt     : DateTime?
 
 ## 8. Pruebas
 
+### 8.1 Objetivo de cobertura
+
+La suite de pruebas debe mantener una **cobertura mínima del 98%** sobre el código de las capas de dominio, aplicación, infraestructura y presentación. El umbral se evalúa con `coverlet.collector` (formato Cobertura) y debe verificarse antes de considerar válida una Contribución al proyecto.
+
+| Métrica       | Umbral mínimo |
+|---------------|---------------|
+| Cobertura de líneas (`line-rate`)   | **≥ 98%** |
+| Cobertura de ramas (`branch-rate`)  | **≥ 98%** |
+
+Comando de verificación:
+
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### 8.2 Distribución de tests
+
 ```
 tests/testNet.Tests/
 ├── Domain/
 │   ├── ProductTests.cs                 # 13 tests
 │   ├── ProductCodeTests.cs             # 5 tests
 │   ├── PriceTests.cs                   # 6 tests
-│   └── ProductDomainServiceTests.cs    # 3 tests
+│   ├── ProductDomainServiceTests.cs    # 3 tests
+│   └── DomainExceptionTests.cs         # 2 tests (constructor mensaje y excepción interna)
 ├── Application/
 │   ├── ProductServiceTests.cs          # 15 tests
 │   ├── ValidatorsTests.cs              # 3 tests
 │   ├── ProductMappingTests.cs          # 1 test
+│   ├── PagedResultTests.cs             # 6 tests (TotalPages, HasPreviousPage, HasNextPage)
 │   └── DtoValidationAnnotationsTests.cs # 22 tests (CreateProduct, UpdateProduct, PagedRequest, StockRequest)
+├── Infrastructure/
+│   ├── ProductRepositoryTests.cs       # 12 tests (CRUD y consultas sobre AppDbContext InMemory)
+│   └── DbSeederTests.cs                # 3 tests (SeedAsync, ResetAndSeedAsync)
 └── API/
     ├── ProductsControllerTests.cs      # 10 tests
+    ├── ExceptionMiddlewareTests.cs     # 4 tests (DomainException, KeyNotFoundException, excepción inesperada)
     └── IntegrationTests.cs              # 4 tests (Redoc, Swagger y Seed endpoint)
 ```
 
-**Total: 90 tests** — Validación de dominio, servicios de aplicación, mapeo DTO, controladores, anotaciones de datos, documentación interactiva y seed endpoint.
+**Total: 135 tests — Cobertura: 99.63% líneas, 100% ramas.** Validación de dominio, servicios de aplicación, mapeo DTO, controladores, repositorios, middleware de excepciones, seeder de base de datos, anotaciones de datos, documentación interactiva y seed endpoint.

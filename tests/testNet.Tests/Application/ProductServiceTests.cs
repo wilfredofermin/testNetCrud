@@ -93,6 +93,17 @@ public class ProductServiceTests
     }
 
     [Fact]
+    public async Task GetByCodeAsync_NonExistingProduct_ShouldReturnNull()
+    {
+        _repositoryMock.Setup(r => r.GetByCodeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Product?)null);
+
+        var result = await _productService.GetByCodeAsync("MISSING");
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
     public async Task GetAllAsync_ShouldReturnAllProducts()
     {
         var products = new List<Product>
@@ -194,6 +205,27 @@ public class ProductServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_WithInactiveFlag_ShouldDeactivateProduct()
+    {
+        var product = CreateSampleProduct();
+        _repositoryMock.Setup(r => r.GetByIdAsync(product.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(product);
+
+        var dto = new UpdateProductDto
+        {
+            Name = "Updated",
+            Description = "Desc",
+            Price = 19.99m,
+            StockQuantity = 100,
+            IsActive = false
+        };
+        var result = await _productService.UpdateAsync(product.Id, dto);
+
+        result.IsActive.Should().BeFalse();
+        _repositoryMock.Verify(r => r.Update(product), Times.Once);
+    }
+
+    [Fact]
     public async Task DeleteAsync_ExistingProduct_ShouldDelete()
     {
         var product = CreateSampleProduct();
@@ -250,5 +282,27 @@ public class ProductServiceTests
         Func<Task> act = () => _productService.RemoveStockAsync(product.Id, 999);
 
         await act.Should().ThrowAsync<DomainException>();
+    }
+
+    [Fact]
+    public async Task AddStockAsync_NonExistingProduct_ShouldThrow()
+    {
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Product?)null);
+
+        Func<Task> act = () => _productService.AddStockAsync(Guid.NewGuid(), 10);
+
+        await act.Should().ThrowAsync<DomainException>().WithMessage("*not found*");
+    }
+
+    [Fact]
+    public async Task RemoveStockAsync_NonExistingProduct_ShouldThrow()
+    {
+        _repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Product?)null);
+
+        Func<Task> act = () => _productService.RemoveStockAsync(Guid.NewGuid(), 10);
+
+        await act.Should().ThrowAsync<DomainException>().WithMessage("*not found*");
     }
 }
