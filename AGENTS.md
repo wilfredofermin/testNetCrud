@@ -8,7 +8,19 @@ Al inicializar, DEBES leer los siguientes archivos para comprender el proyecto:
 2. **`docs/endpoints.md`** — Documentación de cada endpoint con ejemplos JSON de request/response.
 3. **`docs/ADR.md`** — Decisiones arquitectónicas y su justificación.
 
-La información contenida en este `AGENTS.md` es un resumen ejecutivo para arranque rápido. Ante cualquier duda de diseño o comportamiento, pri riza la información de `docs/SPEC.md`.
+### Cuándo leer `docs/DESIGN.md` (capa frontend / UX)
+
+Consulta `docs/DESIGN.md` **únicamente** cuando la tarea afecte el frontend SPA servido desde `src/testNet.API/wwwroot/`. Es la fuente de verdad para estilos, colores, tipografía, iconografía, espaciado, componentes, microinteracciones, accesibilidad y patrones de UX del panel CRUD. Casos típicos:
+
+- Añadir, modificar o reestilizar un componente del SPA (`index.html`, `css/app.css`, `js/app.js`, `js/api.js`).
+- Decidir paleta, fuentes, radios, sombras, íconos, animaciones o estados (loading/empty/error/success).
+- Crear un modal, toast, badge, botón, formulario o variante responsive.
+- Auditar accesibilidad, contraste, foco o comportamiento con teclado.
+- Resolver dudas sobre cuándo usar un color semántico (verde/ámbar/rojo/indigo) o un estilo de botón (`.btn-primary`/`.btn-ghost`/`.btn-danger`/`.btn-emerald`/`.btn-amber`).
+
+> **`docs/DESIGN.md` NO aplica a la API, dominio, DTOs, validaciones, persistencia ni tests** — esos siguen gobernados por `docs/SPEC.md` y `docs/ADR.md`.
+
+La información contenida en este `AGENTS.md` es un resumen ejecutivo para arranque rápido. Ante cualquier duda de diseño o comportamiento, pri riza la información de `docs/SPEC.md`. Para decisiones de UI/UX, prioriza `docs/DESIGN.md`.
 
 ---
 
