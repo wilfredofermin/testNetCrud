@@ -2,6 +2,7 @@
 
 API RESTful de gestión de productos sobre **.NET 8** con arquitectura **Domain-Driven Design** en 4 capas estrictas. Implementa CRUD completo con 11 endpoints, control de inventario, paginación con metadatos y Value Objects inmutables. Documentación interactiva via Swagger UI y Redoc. Persistencia con EF Core InMemory (intercambiable por SQL Server/PostgreSQL). **90 tests** (xUnit + Moq + FluentAssertions + WebApplicationFactory). Sin dependencias externas más allá de EF Core y Swashbuckle — cero AutoMapper, cero FluentValidation.
 
+![alt text](image-2.png)
 ## Arquitectura
 
 ```
